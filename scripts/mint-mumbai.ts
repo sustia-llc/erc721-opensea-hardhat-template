@@ -1,27 +1,24 @@
 import dotenv from 'dotenv';
 import { ContractTransaction, ethers } from "ethers";
 import { QXS } from "../typechain";
-
-// hh run --network rinkeby scripts/mint-rinkeby.ts
-// https://rinkeby.etherscan.io/address/<contract address>
-
+// hh run --network matic scripts/mint-mumbai.ts
+// https://explorer-mumbai.maticvigil.com/address/<contract address>
 const abi = [
   'function mintTo(address to) public',
 ]
 
 async function main() {
   dotenv.config();
-  const INFURA_API_KEY = process.env.INFURA_API_KEY || '';
-  const RINKEBY_PRIVATE_KEY = process.env.RINKEBY_PRIVATE_KEY || '';
-  const URL = `https://rinkeby.infura.io/v3/${INFURA_API_KEY}`;
+  const MUMBAI_PRIVATE_KEY = process.env.MUMBAI_PRIVATE_KEY || '';
+  const URL = 'https://rpc-mumbai.maticvigil.com';
   console.log(`url: ${URL}`);
 
   const provider = new ethers.providers.JsonRpcProvider(URL);
-  const deployer = new ethers.Wallet(RINKEBY_PRIVATE_KEY, provider);
+  const deployer = new ethers.Wallet(MUMBAI_PRIVATE_KEY, provider);
   const deployerAddress = await deployer.getAddress();
   console.log(`deployer address: ${deployerAddress}`);
 
-  const contractAddress = process.env.RINKEBY_CONTRACT_ADDRESS || '';
+  const contractAddress = process.env.MUMBAI_CONTRACT_ADDRESS || '';
   const mintToAddress = process.env.MINT_TO_ADDRESS || '';
   console.log(`mintToAddress: ${mintToAddress}`);  
 
