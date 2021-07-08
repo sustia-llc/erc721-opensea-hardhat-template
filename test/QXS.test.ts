@@ -2,7 +2,6 @@ import { ethers } from "hardhat";
 import chai from "chai";
 import { QXS__factory, QXS } from "../typechain";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { BigNumber } from "ethers";
 
 const { expect } = chai;
 
@@ -35,21 +34,38 @@ describe("qxs", () => {
 
     describe("minting", async () => {
         it('deployer can mint tokens', async () => {
-            const tokenId = ethers.BigNumber.from(1);
+            const tokenId = ethers.BigNumber.from(0);
+            const tokenURI = "https://eth.iwahi.com/1df0";
 
-            await expect(qxs.connect(deployer).mintTo(other.address))
+            await expect(qxs.connect(deployer).safeMint(other.address, tokenURI))
                 .to.emit(qxs, 'Transfer')
                 .withArgs(ZERO_ADDRESS, other.address, tokenId);
 
             expect(await qxs.balanceOf(other.address)).to.equal(1);
             expect(await qxs.ownerOf(tokenId)).to.equal(other.address);
 
-            expect(await qxs.tokenURI(tokenId)).to.equal(await qxs.baseTokenURI() + tokenId.toString());
+            expect(await qxs.tokenURI(tokenId)).to.equal(tokenURI);
         });
 
         it('other accounts cannot mint tokens', async () => {
-            await expect(qxs.connect(other).mintTo(other.address))
-                .to.be.revertedWith('revert Ownable: caller is not the owner');
+            const tokenURI = "https://eth.iwahi.com/2d3a";
+            await expect(qxs.connect(other).safeMint(other.address, tokenURI))
+                .to.be.revertedWith('Ownable: caller is not the owner');
+        });
+    });
+
+    describe("burning", async () => {
+        it('holders can burn their tokens', async () => {
+            const tokenId = ethers.BigNumber.from(0);
+            const tokenURI = "https://eth.iwahi.com/e01b";
+
+            await qxs.connect(deployer).safeMint(other.address, tokenURI);
+
+            await expect(qxs.connect(other).burn(tokenId))
+                .to.emit(qxs, 'Transfer')
+                .withArgs(other.address, ZERO_ADDRESS, tokenId);
+            expect(await qxs.balanceOf(other.address)).to.equal(0);
+            expect(await qxs.totalSupply()).to.equal(0);
         });
     });
 });

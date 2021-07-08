@@ -6,9 +6,7 @@ let qxs: QXS;
 let qxsFactory: QXS__factory;
 let deployer: SignerWithAddress;
 
-const name = 'QXS ERC721 minter';
-const symbol = 'QXS';
-const PROXY_REGISTRATION_ADDRESS = '0xf57b2c51ded3a29e6891aba85459d600256cf317';
+const PROXY_REGISTRATION_ADDRESS = '0xa5409ec958c83c3f309868babaca7c86dcb077c1';
 
 async function main() {
   [deployer] = await ethers.getSigners();

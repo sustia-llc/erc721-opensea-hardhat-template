@@ -6,7 +6,7 @@ import { QXS } from "../typechain";
 // https://rinkeby.etherscan.io/address/<contract address>
 
 const abi = [
-  'function mintTo(address to) public',
+  'function safeMint(address _to, string _metadataURI) public',
 ]
 
 async function main() {
@@ -22,13 +22,15 @@ async function main() {
   console.log(`deployer address: ${deployerAddress}`);
 
   const contractAddress = process.env.RINKEBY_CONTRACT_ADDRESS || '';
+  console.log(`contractAddress: ${contractAddress}`);
   const mintToAddress = process.env.MINT_TO_ADDRESS || '';
   console.log(`mintToAddress: ${mintToAddress}`);  
 
   const contract: QXS = new ethers.Contract(contractAddress, abi, deployer) as QXS;
+  const mintTokenURI = 'https://arweave.net/-DkL_O5TDgA-edjW2oakcpjk_387IQ1ruqd7dzrhs_Q';
 
   const receipt: ContractTransaction = await contract.connect(deployer)
-    .mintTo(mintToAddress, { gasLimit: 3000000 });
+    .safeMint(mintToAddress, mintTokenURI, { gasLimit: 3000000 });
 
   // receipt should include tokenURI with tokenID
   // here is where you would supply metadata to the above address

@@ -3,9 +3,10 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
 import "./common/meta-transactions/ContentMixin.sol";
 import "./common/meta-transactions/NativeMetaTransaction.sol";
@@ -20,11 +21,18 @@ contract ProxyRegistry {
  * @title ERC721Tradable
  * ERC721Tradable - ERC721 contract that whitelists a trading address, and has minting functionality.
  */
-abstract contract ERC721Tradable is ContextMixin, ERC721Enumerable, NativeMetaTransaction, Ownable {
-    using SafeMath for uint256;
+abstract contract ERC721Tradable is
+    ContextMixin,
+    ERC721Enumerable,
+    NativeMetaTransaction,
+    ERC721URIStorage,
+    ERC721Burnable,
+    Ownable
+{
+    using Counters for Counters.Counter;
+    Counters.Counter private _tokenIdCounter;
 
     address proxyRegistryAddress;
-    uint256 private _currentTokenId = 0;
 
     constructor(
         string memory _name,
@@ -36,43 +44,57 @@ abstract contract ERC721Tradable is ContextMixin, ERC721Enumerable, NativeMetaTr
     }
 
     /**
-     * @dev Mints a token to an address with a tokenURI.
+     * @dev Safely mints a token to an address with a tokenURI.
      * @param _to address of the future owner of the token
+     * @param _metadataURI full URI to token metadata
      */
-    function mintTo(address _to) public onlyOwner {
-        uint256 newTokenId = _getNextTokenId();
-        _mint(_to, newTokenId);
-        _incrementTokenId();
+    function safeMint(address _to, string memory _metadataURI) public onlyOwner {
+        uint256 newTokenId = _tokenIdCounter.current();
+        _safeMint(_to, newTokenId);
+        _setTokenURI(newTokenId, _metadataURI);
+        _tokenIdCounter.increment();
     }
 
-    /**
-     * @dev calculates the next token ID based on value of _currentTokenId
-     * @return uint256 for the next token ID
-     */
-    function _getNextTokenId() private view returns (uint256) {
-        return _currentTokenId.add(1);
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override(ERC721, ERC721Enumerable) {
+        super._beforeTokenTransfer(from, to, tokenId);
     }
 
-    /**
-     * @dev increments the value of _currentTokenId
-     */
-    function _incrementTokenId() private {
-        _currentTokenId++;
+    function _burn(uint256 tokenId)
+        internal
+        override(ERC721, ERC721URIStorage)
+    {
+        super._burn(tokenId);
     }
 
-    function baseTokenURI() virtual public pure returns (string memory);
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        override(ERC721, ERC721URIStorage)
+        returns (string memory)
+    {
+        return super.tokenURI(tokenId);
+    }
 
-    function tokenURI(uint256 _tokenId) override public pure returns (string memory) {
-        return string(abi.encodePacked(baseTokenURI(), Strings.toString(_tokenId)));
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721, ERC721Enumerable)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
     }
 
     /**
      * Override isApprovedForAll to whitelist user's OpenSea proxy accounts to enable gas-less listings.
      */
     function isApprovedForAll(address owner, address operator)
-        override
         public
         view
+        override
         returns (bool)
     {
         // Whitelist OpenSea proxy contract for easy trading.
@@ -87,12 +109,7 @@ abstract contract ERC721Tradable is ContextMixin, ERC721Enumerable, NativeMetaTr
     /**
      * This is used instead of msg.sender as transactions won't be sent by the original token owner, but by OpenSea.
      */
-    function _msgSender()
-        internal
-        override
-        view
-        returns (address sender)
-    {
+    function _msgSender() internal view override returns (address sender) {
         return ContextMixin.msgSender();
     }
 }
