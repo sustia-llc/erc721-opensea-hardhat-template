@@ -2,11 +2,12 @@ import dotenv from 'dotenv';
 import { ContractTransaction, ethers } from "ethers";
 import { QXS } from "../typechain";
 
+// TODO: https://hardhat.org/guides/create-task.html with tokenURI parameter on commandline
 // hh run --network mainnet scripts/mint-mainnet.ts
 // https://etherscan.io/address/<contract address>
 
 const abi = [
-  'function safeMint(address _to, string _metadataURI ) public',
+  'function safeMint(address to, string metadataURI ) public',
 ]
 
 async function main() {
@@ -27,15 +28,11 @@ async function main() {
   console.log(`mintToAddress: ${mintToAddress}`);  
 
   const contract: QXS = new ethers.Contract(contractAddress, abi, deployer) as QXS;
-  const mintTokenURI = 'https://arweave.net/p94DFXUKhuN9wOHTXBxjxLTl6_66nCvQo3Yde8I7uxc';
+  const mintTokenURI = 'https://arweave.net/Sd-IEPgkuTSU3tFnxfyiSj6P2gjEPzNLATq_Haibh_0';
 
   const receipt: ContractTransaction = await contract.connect(deployer)
     .safeMint(mintToAddress, mintTokenURI, { gasLimit: 3000000 });
 
-  // receipt should include tokenURI with tokenID
-  // here is where you would supply metadata to the above address
-  // possibly with a REST post that would create json at that address
-  // that would contain a link to the mp4, etc.
   console.log('minted:', receipt);
   process.exit(0)
 }

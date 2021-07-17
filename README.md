@@ -71,12 +71,20 @@ npx arweave deploy data/qxs-contract.json
 Update "contractURI" in contracts/QXS.sol
 
 ## Set up Metadata and Images for First Minted Work
-Arweave image or video should be less than 10MB:
+Upload image as a 480x480 animated gif:
+```sh
+ffmpeg -i qxs-1.mp4 -vf scale=480:-1 qxs-1.gif
+npx arweave deploy assets/qxs-1.gif
+```
+
+After Arweave deployment, update "image" with the resulting Arweave URL in qxs-1.json.
+
+Upload animation_url as a 1024x1024 mp4 with vcodec H.264, pixel format YUV 4:2:0, and CRF 25. Arweave image or video should be less than 10MB:
 ```sh
 npx arweave deploy assets/qxs-1.mp4
 ```
 
-After Arweave deployment, update value for "image" in qxs-1.json. Deploy qxs-1.json:
+After Arweave deployment, update "animation_url" with the resulting Arweave URL in qxs-1.json. Deploy qxs-1.json:
 ```sh
 npx arweave deploy data/qxs-1.json
 ```
@@ -107,12 +115,20 @@ Visit the following URL, by providing the new contract address:
 https://rinkeby.etherscan.io/address/_contract-address_
 
 ### Mint to Rinkeby
+Verify mintTokenURI
 ```sh
 hh run --network rinkeby scripts/mint-rinkeby.ts
 ```
 
 ### Check contract on OpenSea
 Go to https://testnets.opensea.io/ connect wallet using the Rinkeby network. Choose "My Collections" and "Import an existing smart contract". Enter the Rinkeby Contract Address.
+
+### Burn Token on Rinkeby
+Verify TokenId
+```sh
+hh run --network rinkeby scripts/burn-rinkeby.ts
+```
+Token will be transferred to the zero address
 
 ## Deploy to mainnet
 ```sh

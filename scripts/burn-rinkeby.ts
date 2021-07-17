@@ -2,14 +2,12 @@ import dotenv from 'dotenv';
 import { ContractTransaction, ethers } from "ethers";
 import { QXS } from "../typechain";
 
-// TODO: https://hardhat.org/guides/create-task.html with tokenURI parameter on commandline
-// hh run --network rinkeby scripts/mint-rinkeby.ts
-// https://rinkeby.etherscan.io/address/<contract address>
+// TODO: https://hardhat.org/guides/create-task.html
+// hh run --network rinkeby scripts/burn-rinkeby.ts with tokenId parameter on commandline
 
 const abi = [
-  'function safeMint(address to, string metadataURI) public',
+  'function burn(uint256 tokenId ) public',
 ]
-
 async function main() {
   dotenv.config();
   const INFURA_API_KEY = process.env.INFURA_API_KEY || '';
@@ -23,17 +21,16 @@ async function main() {
   console.log(`deployer address: ${deployerAddress}`);
 
   const contractAddress = process.env.RINKEBY_CONTRACT_ADDRESS || '';
-  console.log(`contractAddress: ${contractAddress}`);
+  console.log(`contractAddress: ${contractAddress}`);  
   const mintToAddress = process.env.MINT_TO_ADDRESS || '';
   console.log(`mintToAddress: ${mintToAddress}`);  
 
   const contract: QXS = new ethers.Contract(contractAddress, abi, deployer) as QXS;
-  const mintTokenURI = 'https://arweave.net/Sd-IEPgkuTSU3tFnxfyiSj6P2gjEPzNLATq_Haibh_0';
-
+  const tokenId = ethers.BigNumber.from(0);
   const receipt: ContractTransaction = await contract.connect(deployer)
-    .safeMint(mintToAddress, mintTokenURI, { gasLimit: 3000000 });
+    .burn(tokenId, { gasLimit: 300000 });
 
-  console.log('minted:', receipt);
+  console.log('burned:', receipt);
   process.exit(0)
 }
 

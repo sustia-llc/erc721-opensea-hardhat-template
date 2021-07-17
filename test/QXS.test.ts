@@ -30,10 +30,15 @@ describe("qxs", () => {
         it('deployer is owner', async () => {
             expect(await qxs.owner()).to.equal(deployer.address);
         });
+
+        it("has expected name and symbol", async function () {
+            expect(await qxs.name()).to.equal("QXS ERC721 minter");
+            expect(await qxs.symbol()).to.equal("QXS");
+        });
     });
 
     describe("minting", async () => {
-        it('deployer can mint tokens', async () => {
+        it('contract owner can mint tokens', async () => {
             const tokenId = ethers.BigNumber.from(0);
             const tokenURI = "https://eth.iwahi.com/1df0";
 
@@ -43,7 +48,6 @@ describe("qxs", () => {
 
             expect(await qxs.balanceOf(other.address)).to.equal(1);
             expect(await qxs.ownerOf(tokenId)).to.equal(other.address);
-
             expect(await qxs.tokenURI(tokenId)).to.equal(tokenURI);
         });
 
@@ -59,13 +63,64 @@ describe("qxs", () => {
             const tokenId = ethers.BigNumber.from(0);
             const tokenURI = "https://eth.iwahi.com/e01b";
 
-            await qxs.connect(deployer).safeMint(other.address, tokenURI);
+            await expect(qxs.connect(deployer).safeMint(other.address, tokenURI))
+                .to.emit(qxs, 'Transfer')
+                .withArgs(ZERO_ADDRESS, other.address, tokenId);
 
             await expect(qxs.connect(other).burn(tokenId))
                 .to.emit(qxs, 'Transfer')
                 .withArgs(other.address, ZERO_ADDRESS, tokenId);
             expect(await qxs.balanceOf(other.address)).to.equal(0);
+            await expect(qxs.ownerOf(tokenId))
+                .to.be.revertedWith('ERC721: owner query for nonexistent token');
             expect(await qxs.totalSupply()).to.equal(0);
+        });
+
+        it('cannot burn if not token owner', async () => {
+            const tokenId = ethers.BigNumber.from(0);
+            const tokenURI = "https://eth.iwahi.com/e01b";
+
+            await expect(qxs.connect(deployer).safeMint(other.address, tokenURI))
+                .to.emit(qxs, 'Transfer')
+                .withArgs(ZERO_ADDRESS, other.address, tokenId);
+
+            await expect(qxs.connect(deployer).burn(tokenId))
+                .to.be.revertedWith('function call to a non-contract account');
+
+            expect(await qxs.balanceOf(other.address)).to.equal(1);
+            expect(await qxs.totalSupply()).to.equal(1);
+        });
+    });
+
+    describe("setTokenURI", async () => {
+        it('contract owner can change tokenURI after minting', async () => {
+            const tokenId = ethers.BigNumber.from(0);
+            const tokenURI = "https://eth.iwahi.com/e01b";
+            const tokenURI2 = "https://eth.iwahi.com/e01c";
+
+            await expect(qxs.connect(deployer).safeMint(other.address, tokenURI))
+                .to.emit(qxs, 'Transfer')
+                .withArgs(ZERO_ADDRESS, other.address, tokenId);
+
+            await qxs.connect(deployer).setTokenURI(tokenId, tokenURI2);
+
+            expect(await qxs.tokenURI(tokenId)).to.equal(tokenURI2);
+        });
+
+        it('other accounts cannot change a tokenURI', async () => {
+            const tokenId = ethers.BigNumber.from(0);
+            const tokenURI = "https://eth.iwahi.com/e01b";
+            const tokenURI2 = "https://eth.iwahi.com/e01c";
+
+            await expect(qxs.connect(deployer).safeMint(other.address, tokenURI))
+                .to.emit(qxs, 'Transfer')
+                .withArgs(ZERO_ADDRESS, other.address, tokenId);
+
+            await expect(qxs.connect(other).setTokenURI(tokenId, tokenURI2))
+                .to.be.revertedWith('Ownable: caller is not the owner');
+            
+            // tokenURI did not change
+            expect(await qxs.tokenURI(tokenId)).to.equal(tokenURI);
         });
     });
 });
