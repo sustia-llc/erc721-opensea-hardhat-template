@@ -128,7 +128,7 @@ Verify TokenId
 ```sh
 hh run --network rinkeby scripts/burn-rinkeby.ts
 ```
-Token will be transferred to the zero address
+Token will be transferred to the zero address and marked as nonexistent token
 
 ## Deploy to mainnet
 ```sh
