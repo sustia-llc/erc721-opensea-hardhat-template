@@ -79,12 +79,6 @@ abstract contract ERC721Tradable is
         return super.tokenURI(tokenId);
     }
 
-    function setTokenURI(uint256 tokenId, string memory metadataURI)
-        public onlyOwner
-    {
-        super._setTokenURI(tokenId, metadataURI);
-    }
-
     function supportsInterface(bytes4 interfaceId)
         public
         view

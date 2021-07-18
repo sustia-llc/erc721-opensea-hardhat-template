@@ -6,7 +6,7 @@ import "./ERC721Tradable.sol";
 contract QXS is ERC721Tradable {
     constructor(
         address _proxyRegistryAddress
-    ) ERC721Tradable('QXS ERC721 minter', 'QXS', _proxyRegistryAddress) {}
+    ) ERC721Tradable('QXSs', 'QXS', _proxyRegistryAddress) {}
 
     /**
      * @dev Link to Contract metadata https://docs.opensea.io/docs/contract-level-metadata
