@@ -106,7 +106,7 @@ Supply the private key of the contract owner in .env:
 
 Deploy contract to Rinkeby:
 ```sh
-hh run --network rinkeby scripts/deploy-rinkeby.ts
+hh deploy --network rinkeby
 ```
 Note the deployed contract's address and update value in .env:
 * RINKEBY_CONTRACT_ADDRESS=
