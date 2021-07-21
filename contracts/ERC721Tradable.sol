@@ -33,6 +33,8 @@ abstract contract ERC721Tradable is
 
     address proxyRegistryAddress;
 
+    event PermanentURI(string value, uint256 indexed id);
+
     constructor(
         string memory _name,
         string memory _symbol,
@@ -52,8 +54,15 @@ abstract contract ERC721Tradable is
     {
         uint256 newTokenId = _tokenIdCounter.current();
         _safeMint(to, newTokenId);
-        _setTokenURI(newTokenId, metadataURI);
+        _setPermanentURI(newTokenId, metadataURI);
         _tokenIdCounter.increment();
+    }
+
+    function _setPermanentURI(uint256 id, string memory uri)
+        internal
+    {
+        _setTokenURI(id, uri);
+        emit PermanentURI(uri, id);
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId)

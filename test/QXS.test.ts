@@ -82,7 +82,9 @@ describe("qxs", () => {
 
             await expect(qxs.connect(deployer).safeMint(other.address, tokenURI))
                 .to.emit(qxs, 'Transfer')
-                .withArgs(ZERO_ADDRESS, other.address, tokenId);
+                .withArgs(ZERO_ADDRESS, other.address, tokenId)
+                .to.emit(qxs, 'PermanentURI')
+                .withArgs(tokenURI, tokenId);
 
             await expect(qxs.connect(deployer).burn(tokenId))
                 .to.be.revertedWith('function call to a non-contract account');

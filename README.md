@@ -45,7 +45,7 @@ hh compile
 hh test
 hh coverage
 ```
-## Local deployment
+## Local deployment and mint
 ```sh
 hh node
 ```
@@ -53,7 +53,13 @@ In a new terminal, go to the repository's root folder and run this to
 deploy your contract:
 
 ```sh
-hh run --network localhost scripts/deploy-localhost.ts
+hh deploy --network localhost
+```
+
+update LOCALHOST_CONTRACT_ADDRESS .env with address of newly deployed contract. 
+
+```sh
+hh mint-token --network localhost --metadata-uri ar://8_NZWr4K9d6N8k4TDbMzLAkW6cNQnSQMLeoShc8komM
 ```
 
 ## Set up Metadata and Image for Contract
@@ -77,19 +83,19 @@ ffmpeg -i qxs-1.mp4 -vf scale=480:-1 qxs-1.gif
 npx arweave deploy assets/qxs-1.gif
 ```
 
-After Arweave deployment, update "image" with the resulting Arweave URL in qxs-1.json.
+After Arweave deployment, update "image" with the resulting Arweave URL (ar://<hash>) in qxs-1.json.
 
 Upload animation_url as a 1024x1024 mp4 with vcodec H.264, pixel format YUV 4:2:0, and CRF 25. Arweave image or video should be less than 10MB:
 ```sh
 npx arweave deploy assets/qxs-1.mp4
 ```
 
-After Arweave deployment, update "animation_url" with the resulting Arweave URL in qxs-1.json. Deploy qxs-1.json:
+After Arweave deployment, update "animation_url" with the resulting Arweave URL (ar://<hash>) in qxs-1.json. Deploy qxs-1.json:
 ```sh
 npx arweave deploy data/qxs-1.json
 ```
 
-Update mintTokenURI in scripts/mint-rinkeby.ts and scripts/mint-mainnet.ts with Arweave path to token metadata file
+Note new Arweave path (ar://<hash>) to token metadata file for minting
 
 ## Deploy to Rinkeby
 Get ether on Rinkeby:
@@ -115,24 +121,22 @@ Visit the following URL, by providing the new contract address:
 https://rinkeby.etherscan.io/address/_contract-address_
 
 ### Mint to Rinkeby
-Verify mintTokenURI
 ```sh
-hh run --network rinkeby scripts/mint-rinkeby.ts
+hh mint-token --network rinkeby --metadata-uri ar://8_NZWr4K9d6N8k4TDbMzLAkW6cNQnSQMLeoShc8komM
 ```
 
 ### Check contract on OpenSea
 Go to https://testnets.opensea.io/ connect wallet using the Rinkeby network. Choose "My Collections" and "Import an existing smart contract". Enter the Rinkeby Contract Address.
 
 ### Burn Token on Rinkeby
-Verify TokenId
 ```sh
-hh run --network rinkeby scripts/burn-rinkeby.ts
+hh burn-token --network rinkeby --token-id 22
 ```
 Token will be transferred to the zero address and marked as nonexistent token
 
 ## Deploy to mainnet
 ```sh
-hh run --network mainnet scripts/deploy-mainnet.ts
+hh deploy --network mainnet
 ```
 
 note the depoloyed contract's address and update value in .env:
@@ -149,8 +153,14 @@ https://etherscan.io/address/_contract-address__#code
 
 ### Mint to mainnet
 ```sh
-hh run --network mainnet scripts/mint-mainnet.ts
+hh mint-token --network mainnet --metadata-uri ar://8_NZWr4K9d6N8k4TDbMzLAkW6cNQnSQMLeoShc8komM
 ```
+
+### Burn Token on mainnet
+```sh
+hh burn-token --network mainnet --token-id 22
+```
+Token will be transferred to the zero address and marked as nonexistent token
 
 ### Check contract on OpenSea
 Go to https://opensea.io/ and connect wallet using the mainnet network. Choose "My Collections" and "Import an existing smart contract". Enter the mainnet Contract Address.
