@@ -41,6 +41,7 @@ enter the following values into .env:
 Clean, compile and test:
 ```sh
 hh clean
+TS_NODE_TRANSPILE_ONLY=1 hh compile
 hh compile
 hh test
 hh coverage
@@ -69,7 +70,7 @@ npx arweave key-save <json file>
 npx arweave deploy assets/qxs.jpg
 ```
 
-After Arweave deployment, update value for "image" in qxs-contract.json. Deploy qxs-contract.json:
+After Arweave deployment, update value for "image" with the resulting Arweave URL in qxs-contract.json. Deploy qxs-contract.json:
 ```sh
 npx arweave deploy data/qxs-contract.json
 ```
